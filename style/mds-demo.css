@@ -1,0 +1,64 @@
+body, html{
+    height: 100%;
+    width: 100%;
+}
+
+#vis-container{
+    height: 100%;
+    width: 80%;
+}
+#legend-container{
+    margin-top: 1em;
+    vertical-align: middle;
+    text-align: center;
+}
+
+#distance-legend{
+    display: inline-block;
+    height: 3em;
+    width: 8em;
+    border-radius: 12px;
+    background-image: linear-gradient(to right, hsl(-15, 60%, 50%), hsl(105, 60%, 50%), hsl(225, 60%, 50%));
+}
+
+.legend-label{
+    position: relative;
+    font-family: "Roboto Mono", "monospace";
+    font-size: 1em;
+}
+
+
+#vis-canvas{
+    height: 75%;
+    width: 90%;
+    border-radius: 26px;
+    border: 1px solid lightgray;
+}
+
+#distance-container{
+    position: absolute;
+    left: 75%;
+    top: 12%;
+}
+
+.distance-table-cell{
+    height: 2.5em;
+    width: 2.5em;
+    text-align: center;
+    vertical-align: middle;
+    border-radius: 10px;
+    border: 1px solid lightgray;
+    opacity: 0.4;
+}
+
+.triangle-cell{
+    opacity: 0.6;
+}
+
+.diagonal-cell{
+    background-color: #83A7BE;
+}
+
+tr.highlighted > td.triangle-cell{
+    opacity: 1.0 !important;
+}
