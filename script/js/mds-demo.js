@@ -15,15 +15,17 @@ function lineLength(line) {
 }
 
 
-function setCellIcon(line, cell){
+function setCellIcon(line, cell) {
     var i = window.points[line.iSource];
     var j = window.points[line.iTarget];
     // Sort the points for consistent icon ordering
-    var sortedPoints = [i, j].sort(function(a, b){ return a.dataPointId - b.dataPointId});
+    var sortedPoints = [i, j].sort(function (a, b) {
+        return a.dataPointId - b.dataPointId
+    });
     // Generate points
     var iconContainer = document.createElement('div');
     iconContainer.classList.add('icon-container');
-    for(var p of sortedPoints){
+    for (var p of sortedPoints) {
         var icon = document.createElement('div');
         icon.style.backgroundColor = p.pointColor;
         icon.innerText = p.dataPointId + 1;
@@ -43,7 +45,16 @@ function updateRanking() {
     });
     for (var i = 0; i < window.lines.length; i++) {
         var line = window.lines[i];
-        setCellIcon(line, document.getElementById(`current-cell${i}`));
+        var cell = document.getElementById(`current-cell${i}`);
+        setCellIcon(line, cell);
+        // Update the color of the "current cell" accordingly.
+        if (i === line.targetRank) {
+            cell.classList.add('target-cell');
+            line.strokeDashArray = [];
+        } else {
+            cell.classList.remove('target-cell');
+            line.strokeDashArray = line.baseDashArray;
+        }
         line.stroke = `hsl(${line.baseHue + (i - line.targetRank) * 15}, ${line.baseSaturation}%, ${line.baseLightness}%)`;
     }
 }
@@ -68,7 +79,7 @@ window.onload = function () {
         },
         'object:moving': function (e) {
             var point = e.target;
-            if (point.sourceLines){
+            if (point.sourceLines) {
                 var sourceLines = point.sourceLines;
                 for (var i = 0; i < sourceLines.length; i++) {
                     sourceLines[i].set({'x1': centerX(point), 'y1': centerY(point)});
@@ -93,6 +104,17 @@ window.onload = function () {
         originX: 'center',
         originY: 'center'
     };
+    var linePrototype = {
+        baseHue: 105,
+        baseSaturation: 75,
+        baseLightness: 50,
+        stroke: 'hsl(105, 75%, 50%)',
+        baseDashArray: [6, 10],
+        strokeDashArray: [6, 10],
+        strokeWidth: 2,
+        selectable: false,
+        evented: false
+    };
 
     var colors = [
         '#37D3B4',
@@ -108,10 +130,11 @@ window.onload = function () {
         [10, 9, 3, 0, 6],
         [7, 5, 4, 6, 0]
     ];
-    
+
     var distanceTable = document.getElementById('distance-table');
     window.points = [];
     window.lines = [];
+    var targetCells = [];
     var iDistances;
     var numRows = 0;
     for (var i = 0; i < distanceMatrix.length; i++) {
@@ -134,6 +157,8 @@ window.onload = function () {
 
         for (var j = 0; j < distanceMatrix.length; j++) {
             if (i > j) {
+                var displayRank = iDistances[j];
+                var zeroIndexedRank = displayRank - 1;
                 // Add a new row to the table.
                 var newRow = document.createElement('tr');
                 var newRankCell = document.createElement('td');
@@ -145,6 +170,7 @@ window.onload = function () {
                 newTargetCell.id = 'target-cell' + numRows;
                 newTargetCell.classList.add('target-cell');
                 newRow.appendChild(newTargetCell);
+                targetCells.push(newTargetCell);
                 var newCurrentCell = document.createElement('td');
                 newCurrentCell.id = 'current-cell' + numRows;
                 newCurrentCell.classList.add('current-cell');
@@ -158,20 +184,11 @@ window.onload = function () {
                     centerY(point),
                     centerX(window.points[j]),
                     centerY(window.points[j])
-                ], {
-                    baseHue: 105,
-                    baseSaturation: 75,
-                    baseLightness: 50,
-                    stroke: 'hsl(105, 75%, 50%)',
-                    strokeDashArray: [6, 10],
-                    strokeWidth: 2,
-                    selectable: false,
-                    evented: false,
+                ], Object.assign({
                     iSource: i,
                     iTarget: j,
-                    targetRank: iDistances[j] - 1
-                });
-                setCellIcon(line, newTargetCell);
+                    targetRank: zeroIndexedRank
+                }, linePrototype));
                 point.sourceLines.push(line);
                 window.points[j].targetLines.push(line);
                 window.lines.push(line);
@@ -179,6 +196,10 @@ window.onload = function () {
                 canvas.sendToBack(line);
             }
         }
+    }
+    // Populate the target cells with icons.
+    for (var l of window.lines) {
+        setCellIcon(l, targetCells[l.targetRank]);
     }
     updateRanking();
     canvas.renderAll();
