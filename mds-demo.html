@@ -10,17 +10,23 @@
 </head>
 <body>
 <div id="content-container">
-    <h1>Multi-dimensional Scaling Exploration</h1>
     <div id="vis-container">
+        <h1>Multi-dimensional Scaling Exploration</h1>
         <canvas id="vis-canvas"></canvas>
+        <div id="legend-container">
+            <span class="legend-label">Too<br/>Close</span>
+            <div id="distance-legend"></div>
+            <span class="legend-label">Too<br/>Far</span>
+        </div>
     </div>
     <div id="distance-container">
-        <table id="distance-table"></table>
-        <div id="legend-container">
-            <span class="legend-label" style="float: left;">Too<br/>Close</span>
-            <div id="distance-legend"></div>
-            <span class="legend-label" style="float: right;">Too<br/>Far</span>
-        </div>
+        <table id="distance-table">
+            <tr class="header-row">
+                <th class="rank-cell">Rank</th>
+                <th class="target-cell">Target</th>
+                <th class="current-cell">Current</th>
+            </tr>
+        </table>
     </div>
 </div>
 <script src="script/js/mds-demo.js"></script>

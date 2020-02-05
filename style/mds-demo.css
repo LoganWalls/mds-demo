@@ -3,11 +3,32 @@ body, html{
     width: 100%;
 }
 
+#content-container{
+    display: flex;
+    flex-direction: row;
+    padding: 2em;
+}
+
 #vis-container{
     height: 100%;
     width: 80%;
 }
+
+#distance-container{
+    display: flex;
+    flex-direction: column;
+    width: 20%
+}
+
+#distance-table{
+    flex-direction: column;
+    margin: 0 2em 0 2em;
+}
+
 #legend-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
     margin-top: 1em;
     vertical-align: middle;
     text-align: center;
@@ -18,6 +39,7 @@ body, html{
     height: 3em;
     width: 8em;
     border-radius: 12px;
+    margin: 0 1em 0 1em;
     background-image: linear-gradient(to right, hsl(-15, 60%, 50%), hsl(105, 60%, 50%), hsl(225, 60%, 50%));
 }
 
@@ -25,6 +47,24 @@ body, html{
     position: relative;
     font-family: "Roboto Mono", "monospace";
     font-size: 1em;
+}
+
+.icon-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5em;
+}
+
+.point-icon{
+    display: flex;
+    margin: 0.1em;
+    justify-content: center;
+    align-items: center;
+    height: 2em;
+    width: 2em;
+    border-radius: 100px;
 }
 
 
@@ -35,30 +75,21 @@ body, html{
     border: 1px solid lightgray;
 }
 
-#distance-container{
-    position: absolute;
-    left: 75%;
-    top: 12%;
-}
 
-.distance-table-cell{
-    height: 2.5em;
-    width: 2.5em;
+
+.rank-cell, .current-cell, .target-cell{
+    border-radius: 4px;
+    border: 1px solid lightgray;
+    border-collapse: collapse;
     text-align: center;
     vertical-align: middle;
-    border-radius: 10px;
-    border: 1px solid lightgray;
-    opacity: 0.4;
 }
 
-.triangle-cell{
-    opacity: 0.6;
+.rank-cell{
+    background-color: lightgray;
 }
 
-.diagonal-cell{
-    background-color: #83A7BE;
+.target-cell{
+    background-color: palegoldenrod;
 }
 
-tr.highlighted > td.triangle-cell{
-    opacity: 1.0 !important;
-}

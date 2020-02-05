@@ -14,16 +14,27 @@ function lineLength(line) {
     return Math.sqrt(Math.pow(line.x2 - line.x1, 2) + Math.pow(line.y2 - line.y1, 2))
 }
 
-function setRowHighlight(e, enabled) {
-    if (e.target) {
-        if (enabled) {
-            document.getElementById('d-table-row-' + e.target.dataPointId.toString())
-                .classList.add('highlighted');
-        } else {
-            document.getElementById('d-table-row-' + e.target.dataPointId.toString())
-                .classList.remove('highlighted');
-        }
+
+function setCellIcon(line, cell){
+    var i = window.points[line.iSource];
+    var j = window.points[line.iTarget];
+    // Sort the points for consistent icon ordering
+    var sortedPoints = [i, j].sort(function(a, b){ return a.dataPointId - b.dataPointId});
+    // Generate points
+    var iconContainer = document.createElement('div');
+    iconContainer.classList.add('icon-container');
+    for(var p of sortedPoints){
+        var icon = document.createElement('div');
+        icon.style.backgroundColor = p.pointColor;
+        icon.innerText = p.dataPointId + 1;
+        icon.classList.add('point-icon');
+        iconContainer.appendChild(icon);
     }
+    // Delete the current content and add the new content
+    while (cell.firstChild) {
+        cell.removeChild(cell.firstChild);
+    }
+    cell.appendChild(iconContainer);
 }
 
 function updateRanking() {
@@ -32,9 +43,7 @@ function updateRanking() {
     });
     for (var i = 0; i < window.lines.length; i++) {
         var line = window.lines[i];
-        document.getElementById(
-            'd-table-cell-' + line.iSource.toString() + line.iTarget.toString()).innerText = i + 1;
-        console.log(line.baseHue + (i - line.targetRank) * 15);
+        setCellIcon(line, document.getElementById(`current-cell${i}`));
         line.stroke = `hsl(${line.baseHue + (i - line.targetRank) * 15}, ${line.baseSaturation}%, ${line.baseLightness}%)`;
     }
 }
@@ -52,10 +61,10 @@ window.onload = function () {
     canvas.selection = false;
     canvas.on({
         'mouse:over': function (e) {
-            setRowHighlight(e, true);
+            // setRowHighlight(e, true);
         },
         'mouse:out': function (e) {
-            setRowHighlight(e, false);
+            // setRowHighlight(e, false);
         },
         'object:moving': function (e) {
             var point = e.target;
@@ -99,21 +108,21 @@ window.onload = function () {
         [10, 9, 3, 0, 6],
         [7, 5, 4, 6, 0]
     ];
-
+    
     var distanceTable = document.getElementById('distance-table');
     window.points = [];
     window.lines = [];
     var iDistances;
-
+    var numRows = 0;
     for (var i = 0; i < distanceMatrix.length; i++) {
         iDistances = distanceMatrix[i];
-
         // Create a point
         var circle = new fabric.Circle(Object.assign({fill: colors[i]}, pointPrototype));
         var label = new fabric.Text((i + 1).toString(), textPrototype);
         var point = new fabric.Group([circle, label], {
             hasControls: false,
             hasBorders: false,
+            pointColor: colors[i],
             left: randInt(canvasWidth - pointPrototype.radius * 2),
             top: randInt(canvasHeight - pointPrototype.radius * 2),
             dataPointId: i,
@@ -123,25 +132,27 @@ window.onload = function () {
         canvas.add(point);
         points.push(point);
 
-        // Create a row in the distances table
-        var newRow = document.createElement('tr');
-        newRow.id = 'd-table-row-' + i.toString();
-        newRow.classList.add('distance-table-row');
-        for (let j = 0; j < distanceMatrix.length; j++) {
-            // Create a new cell
-            var newCell = document.createElement('td');
-            newCell.id = 'd-table-cell-' + i.toString() + j.toString();
-            newCell.classList.add('distance-table-cell');
-            if (i < j) {
-                newCell.classList.add('duplicate-triangle-cell');
-                newCell.textContent = iDistances[j];
-                newCell.style.backgroundColor = colors[i];
-            } else if (i === j) {
-                newCell.textContent = iDistances[j];
-                newCell.classList.add('diagonal-cell');
-            } else {
-                newCell.classList.add('triangle-cell');
-                newCell.style.backgroundColor = colors[j];
+        for (var j = 0; j < distanceMatrix.length; j++) {
+            if (i > j) {
+                // Add a new row to the table.
+                var newRow = document.createElement('tr');
+                var newRankCell = document.createElement('td');
+                newRankCell.id = 'rank-cell' + numRows;
+                newRankCell.classList.add('rank-cell');
+                newRankCell.innerText = numRows + 1;
+                newRow.appendChild(newRankCell);
+                var newTargetCell = document.createElement('td');
+                newTargetCell.id = 'target-cell' + numRows;
+                newTargetCell.classList.add('target-cell');
+                newRow.appendChild(newTargetCell);
+                var newCurrentCell = document.createElement('td');
+                newCurrentCell.id = 'current-cell' + numRows;
+                newCurrentCell.classList.add('current-cell');
+                newRow.appendChild(newCurrentCell);
+                distanceTable.appendChild(newRow);
+                numRows++;
+
+                // Add a line to represent the distance between points i and j
                 var line = new fabric.Line([
                     centerX(point),
                     centerY(point),
@@ -160,15 +171,14 @@ window.onload = function () {
                     iTarget: j,
                     targetRank: iDistances[j] - 1
                 });
+                setCellIcon(line, newTargetCell);
                 point.sourceLines.push(line);
                 window.points[j].targetLines.push(line);
                 window.lines.push(line);
                 canvas.add(line);
                 canvas.sendToBack(line);
             }
-            newRow.appendChild(newCell);
         }
-        distanceTable.appendChild(newRow);
     }
     updateRanking();
     canvas.renderAll();
