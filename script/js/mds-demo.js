@@ -48,14 +48,18 @@ function updateRanking() {
         var cell = document.getElementById(`current-cell${i}`);
         setCellIcon(line, cell);
         // Update the color of the "current cell" accordingly.
-        if (i === line.targetRank) {
-            cell.classList.add('target-cell');
-            line.strokeDashArray = [];
-        } else {
-            cell.classList.remove('target-cell');
-            line.strokeDashArray = line.baseDashArray;
+        if (i !== line.currentRank) {
+            if (i === line.targetRank) {
+                cell.classList.add('target-cell');
+                line.strokeDashArray = [];
+            } else {
+                cell.classList.remove('target-cell');
+                line.strokeDashArray = line.baseDashArray;
+            }
+            line.stroke =
+                `hsl(${line.baseHue + (i - line.targetRank) * 15}, ${line.baseSaturation}%, ${line.baseLightness}%)`;
+            line.dirty = true;
         }
-        line.stroke = `hsl(${line.baseHue + (i - line.targetRank) * 15}, ${line.baseSaturation}%, ${line.baseLightness}%)`;
     }
 }
 
@@ -73,6 +77,7 @@ window.onload = function () {
     canvas.on({
         'object:moving': function (e) {
             var point = e.target;
+            updateRanking();
             if (point.sourceLines) {
                 var sourceLines = point.sourceLines;
                 for (var i = 0; i < sourceLines.length; i++) {
@@ -83,7 +88,6 @@ window.onload = function () {
                     targetLines[i].set({'x2': centerX(point), 'y2': centerY(point)});
                 }
             }
-            updateRanking();
             canvas.renderAll();
         },
     });
@@ -181,7 +185,8 @@ window.onload = function () {
                 ], Object.assign({
                     iSource: i,
                     iTarget: j,
-                    targetRank: zeroIndexedRank
+                    targetRank: zeroIndexedRank,
+                    currentRank: null
                 }, linePrototype));
                 point.sourceLines.push(line);
                 window.points[j].targetLines.push(line);
