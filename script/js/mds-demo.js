@@ -71,12 +71,6 @@ window.onload = function () {
     canvas.setHeight(canvasHeight);
     canvas.selection = false;
     canvas.on({
-        'mouse:over': function (e) {
-            // setRowHighlight(e, true);
-        },
-        'mouse:out': function (e) {
-            // setRowHighlight(e, false);
-        },
         'object:moving': function (e) {
             var point = e.target;
             if (point.sourceLines) {
