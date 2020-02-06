@@ -1,6 +1,7 @@
 body, html{
     height: 100%;
     width: 100%;
+    font-family: "Roboto Mono", monospace;
 }
 
 #content-container{
@@ -45,7 +46,6 @@ body, html{
 
 .legend-label{
     position: relative;
-    font-family: "Roboto Mono", "monospace";
     font-size: 1em;
 }
 
